@@ -19,6 +19,7 @@ type Config struct {
 	Cleanup         int    `json:"cleanup" yaml:"cleanup" toml:"cleanup"`
 	AddStatusHeader bool   `json:"addStatusHeader" yaml:"addStatusHeader" toml:"addStatusHeader"`
 	Force           bool   `json:"force" yaml:"force" toml:"force"`
+	IgnoreUrlQuery  bool   `json:"ignoreUrlQuery" yaml:"ignoreUrlQuery" toml:"ignoreUrlQuery"`
 }
 
 // CreateConfig returns a config instance.
@@ -27,6 +28,7 @@ func CreateConfig() *Config {
 		MaxExpiry:       int((5 * time.Minute).Seconds()),
 		Cleanup:         int((5 * time.Minute).Seconds()),
 		AddStatusHeader: true,
+		IgnoreUrlQuery:  true,
 	}
 }
 
@@ -79,7 +81,7 @@ type cacheData struct {
 func (m *cache) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cs := cacheMissStatus
 
-	key := cacheKey(r)
+	key := cacheKey(m.cfg, r)
 
 	b, err := m.cache.Get(key)
 	if err == nil {
@@ -152,8 +154,12 @@ func (m *cache) cacheable(r *http.Request, w http.ResponseWriter, status int) (t
 	return expiry, true
 }
 
-func cacheKey(r *http.Request) string {
-	return r.Method + r.Host + r.URL.Path + "?" + r.URL.Query().Encode()
+func cacheKey(cfg *Config, r *http.Request) string {
+	key := r.Method + r.Host + r.URL.Path
+	if cfg.IgnoreUrlQuery {
+		return key
+	}
+	return key + "?" + r.URL.Query().Encode()
 }
 
 type responseWriter struct {
