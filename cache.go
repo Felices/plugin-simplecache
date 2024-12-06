@@ -153,7 +153,7 @@ func (m *cache) cacheable(r *http.Request, w http.ResponseWriter, status int) (t
 }
 
 func cacheKey(r *http.Request) string {
-	return r.Method + r.Host + r.URL.Path
+	return r.Method + r.Host + r.URL.Path + "?" + r.URL.Query().Encode()
 }
 
 type responseWriter struct {
