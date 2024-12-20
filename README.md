@@ -78,3 +78,13 @@ without special cache-related headers will not be cached (as in the
 [original plugin](https://github.com/traefik/plugin-simplecache)). Works only
 if [cachecontrol](https://github.com/pquerna/cachecontrol) unable to find any
 reason not to cache the response (due to headers, method, status code, etc.).
+
+#### 	ConsiderUrlQuery (`considerUrlQuery`)
+
+*Default: false*
+
+This determines if a request URL's query parameters are used in the cache key. If
+this is set to `false`, the cached response for one request will be returned for
+subequent requests that differ only by their URL query parameters. If this is set
+to `true`, requests with different query parameters will have different cached
+responses stored.
