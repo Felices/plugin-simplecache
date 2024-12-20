@@ -14,19 +14,21 @@ import (
 
 // Config configures the middleware.
 type Config struct {
-	Path            string `json:"path" yaml:"path" toml:"path"`
-	MaxExpiry       int    `json:"maxExpiry" yaml:"maxExpiry" toml:"maxExpiry"`
-	Cleanup         int    `json:"cleanup" yaml:"cleanup" toml:"cleanup"`
-	AddStatusHeader bool   `json:"addStatusHeader" yaml:"addStatusHeader" toml:"addStatusHeader"`
-	Force           bool   `json:"force" yaml:"force" toml:"force"`
+	Path             string `json:"path" yaml:"path" toml:"path"`
+	MaxExpiry        int    `json:"maxExpiry" yaml:"maxExpiry" toml:"maxExpiry"`
+	Cleanup          int    `json:"cleanup" yaml:"cleanup" toml:"cleanup"`
+	AddStatusHeader  bool   `json:"addStatusHeader" yaml:"addStatusHeader" toml:"addStatusHeader"`
+	Force            bool   `json:"force" yaml:"force" toml:"force"`
+	ConsiderUrlQuery bool   `json:"considerUrlQuery" yaml:"considerUrlQuery" toml:"considerUrlQuery"`
 }
 
 // CreateConfig returns a config instance.
 func CreateConfig() *Config {
 	return &Config{
-		MaxExpiry:       int((5 * time.Minute).Seconds()),
-		Cleanup:         int((5 * time.Minute).Seconds()),
-		AddStatusHeader: true,
+		MaxExpiry:        int((5 * time.Minute).Seconds()),
+		Cleanup:          int((5 * time.Minute).Seconds()),
+		AddStatusHeader:  true,
+		ConsiderUrlQuery: false,
 	}
 }
 
@@ -79,7 +81,7 @@ type cacheData struct {
 func (m *cache) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cs := cacheMissStatus
 
-	key := cacheKey(r)
+	key := cacheKey(m.cfg, r)
 
 	b, err := m.cache.Get(key)
 	if err == nil {
@@ -152,8 +154,12 @@ func (m *cache) cacheable(r *http.Request, w http.ResponseWriter, status int) (t
 	return expiry, true
 }
 
-func cacheKey(r *http.Request) string {
-	return r.Method + r.Host + r.URL.Path
+func cacheKey(cfg *Config, r *http.Request) string {
+	key := r.Method + r.Host + r.URL.Path
+	if !cfg.ConsiderUrlQuery {
+		return key
+	}
+	return key + "?" + r.URL.Query().Encode()
 }
 
 type responseWriter struct {
