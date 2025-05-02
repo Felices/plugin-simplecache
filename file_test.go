@@ -1,4 +1,4 @@
-package plugin_simplecache
+package traefik_plugin_simplecache
 
 import (
 	"bytes"
