@@ -1,5 +1,5 @@
 // Package plugin_simplecache is a plugin to cache responses to disk.
-package plugin_simplecache
+package traefik_plugin_simplecache
 
 import (
 	"encoding/binary"

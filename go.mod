@@ -1,4 +1,4 @@
-module github.com/iamolegga/plugin-simplecache
+module gitlab.com/invisionai-public/traefik-plugin-simplecache
 
 go 1.15
 
